@@ -229,8 +229,8 @@ module side40mm(SIZE = 40,
         }
     }
     
-    MOUNT_SX = MAIN_FAN_SIZE;
-    MOUNT_SY = MAIN_FAN_SIZE;
+    MOUNT_SX = SIZE;
+    MOUNT_SY = SIZE;
     MOUNT_SZ = 7;
     MOUNT_HOLE_INSET = 4;
     MOUNT_RADIAL_THICKNESS = 2*MOUNT_HOLE_INSET;
@@ -247,9 +247,16 @@ module side40mm(SIZE = 40,
                 translate([WALL_THICKNESS-2*SKEW,0,0])
                   sub(SIZE-2*WALL_THICKNESS, HEIGHT-WALL_THICKNESS, SLANT, CUTOFF_OFFSET_Y, OUTCROP+WALL_THICKNESS, OUTCROP_ANGLE, OUTCROP_OFFSET_Z-2*WALL_THICKNESS, MAIN_FAN_SIZE+2*WALL_THICKNESS);
             }
-            translate([MAIN_FAN_SIZE*(1/2 - SKEW), MOUNT_SY/2 + MAIN_FAN_SIZE/2, MOUNT_SZ/2]) {
+            
+            translate([SIZE*(1/2 - SKEW), MOUNT_SY/2 + MAIN_FAN_SIZE/2, MOUNT_SZ/2]) {
                 difference() { // Fan mount
-                    cube([MOUNT_SX, MOUNT_SY, MOUNT_SZ], center=true);
+                    union() {
+                        cube([MOUNT_SX, MOUNT_SY, MOUNT_SZ], center=true);
+                        if (MOUNT_SX < 35) { // Kinda ad-hoc; tweak if incorrect
+                            translate([MOUNT_SX/2,MOUNT_SY/(2*3) - MOUNT_SY/2, MOUNT_SZ/2])
+                              cube([(35-MOUNT_SX)*2, MOUNT_SY/3, MOUNT_SZ*2], center=true);
+                        }
+                    }
                     cube([MOUNT_SX-2*MOUNT_RADIAL_THICKNESS, MOUNT_SY-2*MOUNT_RADIAL_THICKNESS, FOREVER], center=true);
                     cylinder(d=MOUNT_CYLINDER_HOLE_DIAM, h=FOREVER, center=true);
                 }
@@ -262,7 +269,7 @@ module side40mm(SIZE = 40,
             }
         }
         
-        translate([MAIN_FAN_SIZE*(1/2 - SKEW), MOUNT_SY/2 + MAIN_FAN_SIZE/2, SCREW_HOLE_DEPTH/2]) { // Fan mount holes
+        translate([SIZE*(1/2 - SKEW), MOUNT_SY/2 + MAIN_FAN_SIZE/2, SCREW_HOLE_DEPTH/2]) { // Fan mount holes
             for (i=[0:3]) {
                 rotate([0,0,90*i])
                   translate([MOUNT_SX/2-MOUNT_HOLE_INSET, MOUNT_SY/2-MOUNT_HOLE_INSET, 0])
